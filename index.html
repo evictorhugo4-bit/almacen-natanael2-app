@@ -3649,37 +3649,51 @@ _sheetProductos.forEach(p => {
         window.buscarProductoPorCodigoEdit = function(codigo) {
             codigo = (codigo || '').trim();
             if (!codigo) return;
+            // Poner el código en el input siempre
+            const inputEl = document.getElementById('editCodigoInput');
+            if (inputEl) inputEl.value = codigo;
             const prod = prodPorCodigo.get(codigo) || _sheetProductos.find(p =>
                 String(p.codigo||'').trim() === codigo ||
                 String(p.codigos||'').split(',').map(c=>c.trim()).includes(codigo)
             );
             const infoEl = document.getElementById('editCodigoNombre');
             if (prod) {
+                // Código encontrado → cargar precios
                 if (infoEl) { infoEl.textContent = '✓ ' + prod.nombre + (prod.precio ? ' — $' + Utils.fmt(prod.precio) : ''); infoEl.style.display='block'; infoEl.style.color='#10b981'; }
-                // Cargar precios en los campos
                 const costoEl = document.getElementById('editCostoInput');
                 const ventaEl = document.getElementById('editVentaInput');
                 if (costoEl && prod.costo) costoEl.value = prod.costo;
                 if (ventaEl && prod.precio) ventaEl.value = prod.precio;
                 mostrarToast('✓ Producto encontrado: ' + prod.nombre);
             } else {
-                // Mostrar dropdown para asociar el código a cualquier producto
+                // Código no encontrado → ofrecer guardarlo en el producto del carrito que se está editando
                 if (infoEl) {
-                    const opcionesHtml = _sheetProductos
-                        .filter(p => p.nombre)
-                        .sort((a,b) => a.nombre.localeCompare(b.nombre))
-                        .map(p => `<option value="${p.id}">${p.nombre}</option>`)
-                        .join('');
-                    infoEl.innerHTML = `
-                        <div style="color:#f87171;font-size:11px;font-weight:900;margin-bottom:6px;">✗ Código no encontrado — asocialo a un producto:</div>
-                        <select id="selectProdParaCodigo" style="width:100%;background:#0f172a;color:white;border:1px solid #334155;border-radius:8px;padding:6px;font-size:12px;margin-bottom:6px;">
-                            <option value="">-- Elegir producto --</option>
-                            ${opcionesHtml}
-                        </select>
-                        <button onclick="guardarCodigoEnProducto('${codigo}', document.getElementById('selectProdParaCodigo').value)"
-                            style="background:#10b981;color:#000;font-weight:900;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;width:100%;">
-                            💾 Guardar código en este producto
-                        </button>`;
+                    const itemActual = carritoCompra.find(c => String(c.itemId) === String(itemEditandoId));
+                    const prodCarrito = itemActual ? (_sheetProductos.find(p => p.id === itemActual.id) || null) : null;
+                    if (prodCarrito) {
+                        infoEl.innerHTML = `<span style="color:#f87171;">✗ No encontrado</span> &nbsp;
+                            <button onclick="guardarCodigoEnProducto('${codigo}', '${prodCarrito.id}')"
+                                style="background:#10b981;color:#000;font-weight:900;border:none;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:12px;">
+                                💾 Guardar en <b>${prodCarrito.nombre}</b>
+                            </button>`;
+                    } else {
+                        // Sin producto en carrito → dropdown con todos
+                        const opcionesHtml = _sheetProductos
+                            .filter(p => p.nombre)
+                            .sort((a,b) => a.nombre.localeCompare(b.nombre))
+                            .map(p => `<option value="${p.id}">${p.nombre}</option>`)
+                            .join('');
+                        infoEl.innerHTML = `
+                            <div style="color:#f87171;font-size:11px;font-weight:900;margin-bottom:4px;">✗ No encontrado — elegí el producto:</div>
+                            <select id="selectProdParaCodigo" style="width:100%;background:#0f172a;color:white;border:1px solid #334155;border-radius:8px;padding:6px;font-size:12px;margin-bottom:4px;">
+                                <option value="">-- Elegir producto --</option>
+                                ${opcionesHtml}
+                            </select>
+                            <button onclick="guardarCodigoEnProducto('${codigo}', document.getElementById('selectProdParaCodigo').value)"
+                                style="background:#10b981;color:#000;font-weight:900;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:12px;width:100%;">
+                                💾 Guardar código
+                            </button>`;
+                    }
                     infoEl.style.display='block';
                 }
             }
