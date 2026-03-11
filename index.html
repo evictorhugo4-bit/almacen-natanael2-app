@@ -12675,6 +12675,13 @@ console.log("FILTRADAS:", filtradas.length);
                 const elCod = document.getElementById('scanNoEncontradoCodigo');
                 if (elCod) elCod.textContent = 'Código: ' + codigo;
                 document.getElementById('scanNoEncontrado').style.display = 'block';
+                if (_scanModo === 'editar_precio') {
+                    setTimeout(() => {
+                        cerrarScanner();
+                        const f = document.getElementById('editCodigoInput'); if (f) f.value = codigo;
+                        buscarProductoPorCodigoEdit(codigo);
+                    }, 500);
+                }
                 if (_scanModo === 'producto') {
                     setTimeout(() => {
                         const f = document.getElementById('pCodigo');
