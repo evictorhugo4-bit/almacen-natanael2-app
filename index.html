@@ -7321,100 +7321,51 @@ const editando = String(itemEnEdicion) === String(item.itemId);
                 const thumb = item.foto
                     ? `<img src="${driveUrl(item.foto)}" class="w-9 h-9 object-contain rounded-lg shrink-0" alt="">`
                     : `<div class="w-9 h-9 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0" style="background:${color}22;color:${color};border:1.5px solid ${color}44">${initials}</div>`;
-                return `<div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
-                    
+                return `<div class="bg-slate-900 rounded-xl border border-slate-800" style="padding:10px 12px;">
 
-${thumb}
-
-<div class="flex items-center gap-1 mr-2">
-    <button onclick="cambiarCantidadCompra('${item.itemId}', -1)"
-            style="background:#1e293b;color:white;border:none;padding:2px 6px;border-radius:6px;">-</button>
-
-    <span class="text-emerald-500 font-bold w-6 text-center">${item.cantidad}</span>
-
-    <button onclick="cambiarCantidadCompra('${item.itemId}', 1)"
-            style="background:#1e293b;color:white;border:none;padding:2px 6px;border-radius:6px;">+</button>
+<!-- fila 1: imagen + nombre + acciones -->
+<div style="display:flex;align-items:center;gap:8px;">
+    ${thumb}
+    <span style="flex:1;font-size:12px;font-weight:900;color:#e2e8f0;text-transform:uppercase;line-height:1.3;word-break:break-word;">
+        ${Utils.escHtml(item.nombre)}
+    </span>
+    <button onclick="abrirModalPrecios('${item.itemId}')"
+            style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);cursor:pointer;color:#fbbf24;width:34px;height:34px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:8px;flex-shrink:0;">✏️</button>
+    <button onclick="eliminarItemCompra('${item.itemId}')"
+            style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);cursor:pointer;color:#f87171;width:34px;height:34px;font-size:14px;display:flex;align-items:center;justify-content:center;border-radius:8px;flex-shrink:0;">✕</button>
 </div>
 
-
-
-                   ${editando ? `
-
-<div class="flex flex-col gap-2 flex-1">
-
-    <div class="text-xs text-emerald-400 font-bold">
-        EDITAR PRECIOS
+<!-- fila 2: cantidad + subtotal -->
+<div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+    <div style="display:flex;align-items:center;gap:4px;background:#0f172a;border-radius:8px;padding:3px 6px;">
+        <button onclick="cambiarCantidadCompra('${item.itemId}', -1)"
+                style="background:#1e293b;color:white;border:none;padding:2px 10px;border-radius:6px;font-size:15px;font-weight:bold;">−</button>
+        <span style="color:#10b981;font-weight:900;min-width:28px;text-align:center;font-size:15px;">${item.cantidad}</span>
+        <button onclick="cambiarCantidadCompra('${item.itemId}', 1)"
+                style="background:#1e293b;color:white;border:none;padding:2px 10px;border-radius:6px;font-size:15px;font-weight:bold;">+</button>
     </div>
-
- <input type="number"
-value="${item.costo}"
-oninput="console.log('INPUT CAMBIO', this.value); guardarCosto('${item.itemId}', this.value); calcularPrecioSugerido('${item.itemId}', this.value)"
-placeholder="PRECIO COSTO">
-
-<input
-id="precioSugerido_${item.itemId}"
-readonly
-placeholder="PRECIO SUGERIDO"
-style="background:#020617;border:1px solid #334155;border-radius:8px;padding:6px;color:#22c55e;font-weight:bold;">
-
-<input type="number"
-value="${item.venta || 0}"
-onchange="guardarVenta('${item.itemId}', this.value)"
-placeholder="PRECIO VENTA"
-style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:5px;color:white;">
-
-
-
-
-
-    <button onclick="itemEnEdicion=null;renderCarritoCompra();"
-        style="background:#22c55e;color:black;font-weight:bold;padding:5px;border-radius:8px;">
-        CERRAR
-    </button>
-
+    <span style="flex:1;"></span>
+    <span style="font-family:monospace;font-weight:900;color:white;font-size:15px;">$${Utils.fmt(subtotal)}</span>
 </div>
 
-` : `
+${editando ? `
+<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;border-top:1px solid #334155;padding-top:10px;">
+    <div style="font-size:11px;color:#10b981;font-weight:900;text-transform:uppercase;">✏️ Editar precios</div>
+    <input type="number" value="${item.costo}"
+        oninput="guardarCosto('${item.itemId}', this.value); calcularPrecioSugerido('${item.itemId}', this.value)"
+        placeholder="PRECIO COSTO"
+        style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px;color:#10b981;font-weight:bold;font-size:14px;box-sizing:border-box;">
+    <input id="precioSugerido_${item.itemId}" readonly placeholder="PRECIO SUGERIDO"
+        style="width:100%;background:#020617;border:1px solid #334155;border-radius:8px;padding:10px;color:#22c55e;font-weight:bold;font-size:14px;box-sizing:border-box;">
+    <input type="number" value="${item.venta || 0}"
+        onchange="guardarVenta('${item.itemId}', this.value)"
+        placeholder="PRECIO VENTA"
+        style="width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px;color:white;font-weight:bold;font-size:14px;box-sizing:border-box;">
+    <button onclick="itemEnEdicion=null;renderCarritoCompra();"
+        style="background:#22c55e;color:black;font-weight:900;padding:10px;border-radius:8px;border:none;width:100%;font-size:13px;">CERRAR</button>
+</div>` : ''}
 
-<span class="text-xs font-black text-slate-300 uppercase flex-1 truncate">
-    ${Utils.escHtml(item.nombre)}
-</span>
-
-<span class="font-mono font-bold text-white text-xs">
-    $${Utils.fmt(subtotal)}
-</span>
-`}
-
-                   
-
-
-
-
-
-
-
-
-
-        <button onclick="abrirModalPrecios('${item.itemId}')"
-                style="background:none;border:none;cursor:pointer;color:#fbbf24;margin-right:4px;width:28px;height:28px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all 0.2s;"
-                onmouseover="this.style.background='rgba(251,191,36,0.15)'"
-                onmouseout="this.style.background='none'"
-                title="Editar precios">✏️</button>
-
-        <button onclick="eliminarItemCompra('${item.itemId}')"
-
-
-
-
-        style="background:none;border:none;cursor:pointer;color:#64748b;font-size:16px;"
-        onmouseover="this.style.color='#f87171'"
-        onmouseout="this.style.color='#64748b'">
-✕
-</button>
-
-
-
-                </div>`;
+</div>`;
             }).join('');
             calcularCompra();
             lucide.createIcons();
@@ -7989,6 +7940,7 @@ const fecha =
 // Envío a Sheets
 setTimeout(() => {
 
+const idCompraLocal = 'C-' + Date.now();
 let efectivoRestante = efectivo;
 
 const payload = {
